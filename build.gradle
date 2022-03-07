@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'org.mtp'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'org.jetbrains:annotations:22.0.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    implementation 'org.soot-oss:soot:4.2.1'
+    implementation ('org.slf4j:slf4j-nop:1.7.36')
+}
+
+task buildExample(type: Exec) {
+    workingDir '.'
+    commandLine './buildExample.sh'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+build.dependsOn buildExample
+assemble.dependsOn buildExample
+test.dependsOn buildExample
+
+mainClassName = 'dev.compL.iitmandi.Main'
