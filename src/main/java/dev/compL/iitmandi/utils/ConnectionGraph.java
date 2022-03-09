@@ -3,6 +3,7 @@
 
 package dev.compL.iitmandi.utils;
 
+import com.google.common.collect.Sets;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
@@ -10,6 +11,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public final class ConnectionGraph implements Serializable {
+
+    HashMap<ConnectionGraphNode, Boolean> escaping = new HashMap<>();
     HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> fieldEdge = new HashMap<>();
     HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> reversePointsToEdge = new HashMap<>();
     HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> forwardPointsToEdge = new HashMap<>();
@@ -17,10 +20,16 @@ public final class ConnectionGraph implements Serializable {
     HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> reverseDeferredEdge = new HashMap<>();
 
     void addEdgeHelper(ConnectionGraphNode n1, ConnectionGraphNode n2, HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> map) {
+        if (!escaping.containsKey(n1)) {
+            escaping.put(n1, false);
+        }
+        if (!escaping.containsKey(n2)) {
+            escaping.put(n2, false);
+        }
         if (map.containsKey(n1)) {
             map.get(n1).add(n2);
         } else {
-            map.put(n1, new HashSet<>());
+            map.put(n1, Sets.newHashSet(n2));
         }
     }
 
@@ -42,6 +51,15 @@ public final class ConnectionGraph implements Serializable {
                 addEdgeHelper(node1, node2, forwardPointsToEdge);
                 addEdgeHelper(node2, node1, reversePointsToEdge);
                 break;
+        }
+    }
+
+    public void setEscaping(ConnectionGraphNode node) {
+        if (escaping.containsKey(node)) {
+            escaping.put(node, true);
+        }
+        else {
+            escaping.put(node, true);
         }
     }
 

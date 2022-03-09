@@ -50,6 +50,10 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
 
         if (unit instanceof ReturnStmt) {
             // todo handle return
+            Value retRef = ((ReturnStmt) unit).getOp();
+            ConnectionGraphNode retRefNode = new ConnectionGraphNode(retRef.toString(), ConnectionGraph.NodeType.REF,-1);
+
+
 
         } else if (unit instanceof AssignStmt) {
             AssignStmt stmt = (AssignStmt) unit;
@@ -87,7 +91,9 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
                 // cannot bypass field ref
             } else {
                 //field
-                leftRefNodes.add(new ConnectionGraphNode(leftOp.toString(), ConnectionGraph.NodeType.REF, -1, true));
+                ConnectionGraphNode refNode = new ConnectionGraphNode(leftOp.toString(), ConnectionGraph.NodeType.REF, -1);
+                leftRefNodes.add(refNode);
+                out.setEscaping(refNode);
                 if (analysisMode == AnalysisMode.CONTEXT_SENSITIVE) {
                     out.byPass(leftRefNodes.get(0));
                 }
@@ -172,6 +178,7 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
                     out.addEdge(rightNode, fieldNode, ConnectionGraph.EdgeType.FIELD);
                 }
             } else if (rightOp instanceof FieldRef) {
+                // a = b.f
                 FieldRef fieldRefExp = (FieldRef) rightOp;
                 ConnectionGraphNode fieldRefNode = new ConnectionGraphNode(fieldRefExp.getFieldRef().toString(), ConnectionGraph.NodeType.REF, -1);
                 String fieldName = fieldRefExp.getField().toString();
@@ -183,6 +190,7 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
                 }
             }
         }
+
 //        TODO visitor pattern
 //        unit.apply(new AbstractStmtSwitch() {
 //            @Override

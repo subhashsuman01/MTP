@@ -8,7 +8,7 @@ public class IntraAnalysis{
         int f2=2;
     }
 
-    public void methodA(){
+    public int methodA(){
         int a;
         a = 1;
         int b=1;
@@ -18,5 +18,6 @@ public class IntraAnalysis{
         arr[0] = 4;
         Obj obj = new Obj();
         obj.f1 = 1;
+        return obj.f1;
     }
 }

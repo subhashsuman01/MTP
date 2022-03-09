@@ -10,15 +10,6 @@ public class ConnectionGraphNode implements Serializable {
      String name;
      ConnectionGraph.NodeType nodeType;
      int lineNo;
-     boolean escaping;
-
-    public void setEscaping(boolean escaping) {
-        this.escaping = escaping;
-    }
-
-    public boolean isEscaping() {
-        return escaping;
-    }
 
     public int getLineNo() {
         return lineNo;
@@ -36,14 +27,6 @@ public class ConnectionGraphNode implements Serializable {
         name = _name;
         nodeType = _type;
         lineNo = _lineNo;
-        escaping = false;
-    }
-
-    public ConnectionGraphNode(@NotNull String _name, @NotNull ConnectionGraph.NodeType _type, int _lineNo, boolean _escaping) {
-        name = _name;
-        nodeType = _type;
-        lineNo = _lineNo;
-        escaping = _escaping;
     }
 
     @Override

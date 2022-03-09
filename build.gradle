@@ -13,10 +13,13 @@ repositories {
 dependencies {
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'org.jetbrains:annotations:22.0.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
-    implementation 'org.soot-oss:soot:4.2.1'
-    implementation ('org.slf4j:slf4j-nop:1.7.36')
+    testImplementation 'junit:junit:4.13.2'
+    implementation 'org.soot-oss:soot:4.3.0'
+
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.0'
+
 }
 
 task buildExample(type: Exec) {

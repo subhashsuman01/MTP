@@ -5,11 +5,11 @@
 
 package dev.compL.iitmandi.intraAnalysis;
 
+import dev.compL.iitmandi.utils.ConnectionGraph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import soot.*;
-import soot.jimple.ArrayRef;
-import soot.jimple.AssignStmt;
-import soot.jimple.FieldRef;
-import soot.jimple.JimpleBody;
+import soot.jimple.*;
 import soot.options.Options;
 import soot.toolkits.graph.TrapUnitGraph;
 import soot.toolkits.graph.UnitGraph;
@@ -19,6 +19,13 @@ import java.io.File;
 
 public class IntraAnalysis {
     public static void main(String[] args) {
+
+
+        final Logger logger = LoggerFactory.getLogger(IntraAnalysis.class);
+
+        logger.info("hi");
+        logger.error("hi");
+
         String sourceDir = System.getProperty("user.dir") + File.separator + "example" + File.separator + "IntraAnalysis";
         String className = "IntraAnalysis";
         G.reset();
@@ -46,15 +53,10 @@ public class IntraAnalysis {
 
         for (Unit unit : methodBody.getUnits()) {
 //            System.out.println(unit);
-            if (unit instanceof AssignStmt) {
-//                System.out.println(unit);
-                Value leftOp = ((AssignStmt) unit).getLeftOp();
-
-                if (leftOp instanceof ArrayRef) {
-                    System.out.println(unit);
-                    ArrayRef ref = (ArrayRef) leftOp;
-                    System.out.println(ref.getBase());
-                }
+            if (unit instanceof ReturnStmt) {
+                System.out.println(unit);
+                ReturnStmt ret = (ReturnStmt) unit;
+                System.out.println(ret.getOp());
             }
 
         }
