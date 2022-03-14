@@ -23,9 +23,6 @@ public class IntraAnalysis {
 
         final Logger logger = LoggerFactory.getLogger(IntraAnalysis.class);
 
-        logger.info("hi");
-        logger.error("hi");
-
         String sourceDir = System.getProperty("user.dir") + File.separator + "example" + File.separator + "IntraAnalysis";
         String className = "IntraAnalysis";
         G.reset();
@@ -34,9 +31,8 @@ public class IntraAnalysis {
         Options.v().set_soot_classpath(sourceDir);
         Options.v().set_prepend_classpath(true);
         Options.v().set_keep_line_number(true);
-//        Options.v().set_keep_offset(true);
+        Options.v().set_keep_offset(true);
         Options.v().set_main_class(className);
-//        Options.v().setcl
 
         SootClass sc = Scene.v().loadClassAndSupport(className);
         Scene.v().loadNecessaryClasses();

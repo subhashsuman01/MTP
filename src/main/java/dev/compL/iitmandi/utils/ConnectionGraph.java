@@ -4,13 +4,18 @@
 package dev.compL.iitmandi.utils;
 
 import com.google.common.collect.Sets;
+import dev.compL.iitmandi.intraAnalysis.IntraAnalysis;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public final class ConnectionGraph implements Serializable {
+
+    final Logger logger = LoggerFactory.getLogger(IntraAnalysis.class);
 
     HashMap<ConnectionGraphNode, Boolean> escaping = new HashMap<>();
     HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> fieldEdge = new HashMap<>();
@@ -20,6 +25,7 @@ public final class ConnectionGraph implements Serializable {
     HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> reverseDeferredEdge = new HashMap<>();
 
     void addEdgeHelper(ConnectionGraphNode n1, ConnectionGraphNode n2, HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> map) {
+        logger.info("adding edge between n1: {}, n2:{}, map:{}", n1, n2, map);
         if (!escaping.containsKey(n1)) {
             escaping.put(n1, false);
         }
@@ -27,18 +33,25 @@ public final class ConnectionGraph implements Serializable {
             escaping.put(n2, false);
         }
         if (map.containsKey(n1)) {
+            logger.info("map contains n1");
             map.get(n1).add(n2);
         } else {
+            logger.info("map does not have n2");
             map.put(n1, Sets.newHashSet(n2));
         }
     }
 
     void removeEdgeHelper(ConnectionGraphNode node1, ConnectionGraphNode node2, HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> map) {
+        logger.info("Trying to delete n1: {}, n2: {}, from map: {}", node1, node2, map);
+        if (!map.containsKey(node1)) {
+            System.err.println("Error can't find node1 ro be deleted");
+        }
         map.get(node1).remove(node2);
         if (map.get(node1).isEmpty()) map.remove(node1);
     }
 
     public void addEdge(ConnectionGraphNode node1, ConnectionGraphNode node2, @NotNull EdgeType edgeType) {
+        logger.info("addEdge between node1: {}, node2: {}, edgeType: {}", node1, node2, edgeType);
         switch (edgeType) {
             case FIELD:
                 addEdgeHelper(node1, node2, fieldEdge);
@@ -54,16 +67,54 @@ public final class ConnectionGraph implements Serializable {
         }
     }
 
+    public ConnectionGraph merge(ConnectionGraph graph2) {
+        ConnectionGraph ret = new ConnectionGraph();
+
+        for (ConnectionGraphNode key : forwardDeferredEdge.keySet()) {
+            if (!ret.forwardDeferredEdge.containsKey(key)) {
+                ret.forwardDeferredEdge.put(key, new HashSet<>());
+            }
+            ret.forwardDeferredEdge.get(key).addAll(forwardDeferredEdge.get(key));
+            ret.forwardDeferredEdge.get(key).addAll(graph2.forwardDeferredEdge.get(key));
+
+            if (!ret.reverseDeferredEdge.containsKey(key)) {
+                ret.reverseDeferredEdge.put(key, new HashSet<>());
+            }
+            ret.reverseDeferredEdge.get(key).addAll(reverseDeferredEdge.get(key));
+            ret.reverseDeferredEdge.get(key).addAll(graph2.reverseDeferredEdge.get(key));
+
+            if (!ret.reversePointsToEdge.containsKey(key)) {
+                ret.reversePointsToEdge.put(key, new HashSet<>());
+            }
+            ret.reversePointsToEdge.get(key).addAll(reversePointsToEdge.get(key));
+            ret.reversePointsToEdge.get(key).addAll(graph2.reversePointsToEdge.get(key));
+
+            if (!ret.forwardPointsToEdge.containsKey(key)) {
+                ret.forwardPointsToEdge.put(key, new HashSet<>());
+            }
+            ret.forwardPointsToEdge.get(key).addAll(forwardPointsToEdge.get(key));
+            ret.forwardPointsToEdge.get(key).addAll(graph2.forwardPointsToEdge.get(key));
+
+            if (!ret.fieldEdge.containsKey(key)) {
+                ret.fieldEdge.put(key, new HashSet<>());
+            }
+            ret.fieldEdge.get(key).addAll(fieldEdge.get(key));
+            ret.fieldEdge.get(key).addAll(graph2.fieldEdge.get(key));
+        }
+
+        return ret;
+    }
+
     public void setEscaping(ConnectionGraphNode node) {
+        logger.info("Setting node:{} to be escaping", node);
         if (escaping.containsKey(node)) {
-            escaping.put(node, true);
+            System.err.println("Can't find Object to be set Escaping");
         }
-        else {
-            escaping.put(node, true);
-        }
+        escaping.put(node, true);
     }
 
     public void removeEdge(ConnectionGraphNode node1, ConnectionGraphNode node2, EdgeType edgeType) {
+        logger.info("removeEdge node1: {}, node2: {}, edgeType: {}", node1, node2, edgeType);
         switch (edgeType) {
             case DEFERRED:
                 removeEdgeHelper(node1, node2, forwardDeferredEdge);
@@ -77,12 +128,15 @@ public final class ConnectionGraph implements Serializable {
     }
 
     public void byPass(ConnectionGraphNode node) {
+        logger.info("byPassing node: {}", node);
 
         if (reverseDeferredEdge.containsKey(node)) {
+            logger.info("Node present in reverseDeferredEdge");
             List<ConnectionGraphNode> secondNodeList = new ArrayList<>(forwardDeferredEdge.get(node));
             List<ConnectionGraphNode> primaryNodeList = new ArrayList<>(reverseDeferredEdge.get(node));
             List<ConnectionGraphNode> objectList = new ArrayList<>();
             if (forwardPointsToEdge.containsKey(node)) {
+                logger.info("Node present in forwardPointsToEdge");
                 objectList = new ArrayList<>(forwardPointsToEdge.get(node));
             }
 
@@ -98,6 +152,7 @@ public final class ConnectionGraph implements Serializable {
     }
 
     public List<ConnectionGraphNode> findFields(ConnectionGraphNode refNode, String fieldName) {
+        logger.info("finding all reachable fields from refNode {}, fieldName: {}", refNode, fieldName);
         return pointsTo(refNode).stream().map(obj -> new ConnectionGraphNode(fieldName, NodeType.FIELD, obj.lineNo)).collect(Collectors.toList());
     }
 
@@ -121,6 +176,8 @@ public final class ConnectionGraph implements Serializable {
                 });
             }
         }
+
+        logger.info("All possible objects node: {} points to, listObjects {}", node, ret);
 
         return ret;
     }
