@@ -3,7 +3,6 @@ package dev.compL.iitmandi.utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Objects;
 
 public class ConnectionGraphNode implements Serializable {

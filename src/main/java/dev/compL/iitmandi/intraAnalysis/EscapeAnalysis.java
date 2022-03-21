@@ -27,17 +27,30 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
 
     @Override
     protected ConnectionGraph newInitialFlow() {
+        logger.info("Performing newInitialFlow");
         return new ConnectionGraph();
     }
 
     @Override
     protected void copy(ConnectionGraph source, ConnectionGraph dest) {
+        logger.info("Performing Copy");
         dest = SerializationUtils.clone(source);
     }
 
+//    @Override
+//    protected void doAnalysis() {
+//
+//    }
+
     @Override
     protected ConnectionGraph entryInitialFlow() {
+        logger.info("performing entryInitFlow");
         return super.entryInitialFlow();
+    }
+
+    @Override
+    protected boolean isForward() {
+        return true;
     }
 
     @Override
@@ -46,11 +59,14 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
         logger.info("Performing merge for in: {} \n in2: {} \n out: {}", in1, in2, out);
     }
 
-    @Override
+
+
+
     protected void flowThrough(ConnectionGraph in, Unit unit, ConnectionGraph out) {
 
-        logger.info("flowthrough for unit at line {}, {} \n in_graph {} \n out_graph {}", unit.getJavaSourceStartLineNumber(), unit, in, out);
-        out = SerializationUtils.clone(in);
+        logger.info("flowthrough start for unit at line {}, {} \n in_graph {} \n out_graph {}", unit.getJavaSourceStartLineNumber(), unit, in, out);
+
+        out.union(in);
         int lineNo = unit.getJavaSourceStartLineNumber();
 
         if (unit instanceof ReturnStmt) {
@@ -211,6 +227,8 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
                 }
             }
         }
+
+        logger.info("flowthrough end for unit at line {}, {} \n in_graph {} \n out_graph {}", unit.getJavaSourceStartLineNumber(), unit, in, out);
 
 //        TODO covert to visitor pattern
 //        unit.apply(new AbstractStmtSwitch() {

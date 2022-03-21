@@ -36,7 +36,7 @@ public final class ConnectionGraph implements Serializable {
             logger.info("map contains n1");
             map.get(n1).add(n2);
         } else {
-            logger.info("map does not have n2");
+            logger.info("map does not have n1");
             map.put(n1, Sets.newHashSet(n2));
         }
     }
@@ -180,6 +180,14 @@ public final class ConnectionGraph implements Serializable {
         logger.info("All possible objects node: {} points to, listObjects {}", node, ret);
 
         return ret;
+    }
+
+    public void union(ConnectionGraph graph){
+        fieldEdge.putAll(graph.fieldEdge);
+        forwardDeferredEdge.putAll(graph.forwardDeferredEdge);
+        forwardPointsToEdge.putAll(graph.forwardPointsToEdge);
+        reverseDeferredEdge.putAll(graph.reverseDeferredEdge);
+        reversePointsToEdge.putAll(graph.reversePointsToEdge);
     }
 
     @Override

@@ -5,11 +5,10 @@
 
 package dev.compL.iitmandi.intraAnalysis;
 
-import dev.compL.iitmandi.utils.ConnectionGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import soot.*;
-import soot.jimple.*;
+import soot.jimple.JimpleBody;
 import soot.options.Options;
 import soot.toolkits.graph.TrapUnitGraph;
 import soot.toolkits.graph.UnitGraph;
@@ -41,21 +40,15 @@ public class IntraAnalysis {
         SootClass mainClass = Scene.v().getSootClass(className);
         SootMethod method = mainClass.getMethodByName("methodA");
 
-        JimpleBody methodBody = (JimpleBody) method.retrieveActiveBody();
-        UnitGraph unitGraph = new TrapUnitGraph(methodBody);
 
-        SootClass st = Scene.v().getSootClass("IntraAnalysis$Obj");
-        System.out.println(st.getFields());
+        JimpleBody methodBody = (JimpleBody) method.retrieveActiveBody();
 
         for (Unit unit : methodBody.getUnits()) {
-//            System.out.println(unit);
-            if (unit instanceof ReturnStmt) {
-                System.out.println(unit);
-                ReturnStmt ret = (ReturnStmt) unit;
-                System.out.println(ret.getOp());
-            }
-
+            System.out.println(Integer.toString(unit.getJavaSourceStartLineNumber()) + "  " + unit);
         }
+        UnitGraph unitGraph = new TrapUnitGraph(methodBody);
+
+        EscapeAnalysis analysis = new EscapeAnalysis(unitGraph, EscapeAnalysis.AnalysisMode.CONTEXT_INSENSITIVE);
 
 
     }
