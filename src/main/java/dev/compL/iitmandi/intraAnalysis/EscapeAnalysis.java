@@ -10,9 +10,7 @@ import soot.jimple.*;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
     final Logger logger = LoggerFactory.getLogger(IntraAnalysis.class);
@@ -27,24 +25,19 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
 
     @Override
     protected ConnectionGraph newInitialFlow() {
-        logger.info("Performing newInitialFlow");
+//        logger.info("Performing newInitialFlow");
         return new ConnectionGraph();
     }
 
     @Override
     protected void copy(ConnectionGraph source, ConnectionGraph dest) {
-        logger.info("Performing Copy");
+//        logger.info("Performing Copy");
         dest = SerializationUtils.clone(source);
     }
 
-//    @Override
-//    protected void doAnalysis() {
-//
-//    }
-
     @Override
     protected ConnectionGraph entryInitialFlow() {
-        logger.info("performing entryInitFlow");
+//        logger.info("performing entryInitFlow");
         return super.entryInitialFlow();
     }
 
@@ -53,29 +46,38 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
         return true;
     }
 
+    private void mergeHelper(HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> graph1, HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> graph2, HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> graph3){
+        graph1.forEach((elm, set) -> {
+            if (!graph3.containsKey(elm)){
+                graph3.put(elm, new HashSet<>());
+            }
+            set.forEach(elm2 -> graph3.get(elm).add(elm2));
+        });
+        graph2.forEach((elm, set) -> {
+            if (!graph3.containsKey(elm)){
+                graph3.put(elm, new HashSet<>());
+            }
+            set.forEach(elm2 -> graph3.get(elm).add(elm2));
+        });
+    }
+
     @Override
     protected void merge(ConnectionGraph in1, ConnectionGraph in2, ConnectionGraph out) {
-        //todo
+        mergeHelper(in1.getForwardPointsToEdge(), in2.getForwardPointsToEdge(), out.getForwardPointsToEdge());
+        mergeHelper(in1.getForwardDeferredEdge(), in2.getForwardDeferredEdge(), out.getForwardDeferredEdge());
+        mergeHelper(in1.getReverseDeferredEdge(), in2.getReverseDeferredEdge(), out.getReverseDeferredEdge());
+        mergeHelper(in1.getReversePointsToEdge(), in2.getReversePointsToEdge(), out.getReversePointsToEdge());
+        mergeHelper(in1.getFieldEdge(), in2.getFieldEdge(), out.getFieldEdge());
         logger.info("Performing merge for in: {} \n in2: {} \n out: {}", in1, in2, out);
     }
 
-
-
-
     protected void flowThrough(ConnectionGraph in, Unit unit, ConnectionGraph out) {
 
-        logger.info("flowthrough start for unit at line {}, {} \n in_graph {} \n out_graph {}", unit.getJavaSourceStartLineNumber(), unit, in, out);
-
+        logger.info("flowthrough start for unit at line {}, {} \n in_graph {}", unit.getJavaSourceStartLineNumber(), unit, in);
         out.union(in);
         int lineNo = unit.getJavaSourceStartLineNumber();
 
-        if (unit instanceof ReturnStmt) {
-            logger.info("unit is an instance of ReturnStmt");
-            // todo handle return
-            Value retRef = ((ReturnStmt) unit).getOp();
-            ConnectionGraphNode retRefNode = new ConnectionGraphNode(retRef.toString(), ConnectionGraph.NodeType.REF, -1);
-
-        } else if (unit instanceof AssignStmt) {
+        if (unit instanceof AssignStmt) {
 
             AssignStmt stmt = (AssignStmt) unit;
             Type type = stmt.getLeftOp().getType();
@@ -85,7 +87,13 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
 
             // don't need to include primitive types as they are allocated on the stack
             if (type instanceof PrimType) {
-                logger.info("Primitive type assignment");
+                logger.warn("Primitive type assignment");
+                return;
+            }
+            // we only care about data classes
+            SootClass objClass = Scene.v().getSootClass(type.toString());
+            if (objClass.getMethods().size()>1){
+                logger.warn("Not a data class");
                 return;
             }
 
@@ -112,14 +120,12 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
                 ConnectionGraphNode fieldRefNode = new ConnectionGraphNode(fieldRefExp.getFieldRef().toString(), ConnectionGraph.NodeType.REF, -1);
                 String fieldName = fieldRefExp.getField().toString();
                 leftRefNodes.addAll(in.findFields(fieldRefNode, fieldName));
-                logger.info("leftOp is an instance of FieldRef");
-                logger.info("All possible fields reachable by the ref - {}", leftRefNodes);
+                logger.info("leftOp is an instance of FieldRef. All possible fields reachable by the ref - {}", leftRefNodes);
                 // should not bypass field refs as it can point different objects depending on the context
             } else {
                 //field
                 ConnectionGraphNode refNode = new ConnectionGraphNode(leftOp.toString(), ConnectionGraph.NodeType.REF, -1);
                 leftRefNodes.add(refNode);
-                out.setEscaping(refNode);
                 if (analysisMode == AnalysisMode.CONTEXT_SENSITIVE) {
                     out.byPass(leftRefNodes.get(0));
                 }
@@ -131,61 +137,24 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
                     out.addEdge(leftRefNode, rightNode, ConnectionGraph.EdgeType.DEFERRED);
                 }
                 logger.info("rightOp is an instance of local, ref - {}", rightNode);
-            } else if (rightOp instanceof BinopExpr) {
-                // conservative assumption that new object created after operator overloading
-                // phantom node starts with #
-                ConnectionGraphNode rightNode = new ConnectionGraphNode("#" + type.toString(), ConnectionGraph.NodeType.OBJECT, lineNo);
-                for (ConnectionGraphNode leftRefNode : leftRefNodes) {
-                    out.addEdge(leftRefNode, rightNode, ConnectionGraph.EdgeType.POINTSTO);
-                }
-                SootClass objClass = Scene.v().getSootClass(type.toString());
-                Collection<SootField> fields = objClass.getFields().getElementsUnsorted();
-
-                for (SootField field : fields) {
-                    ConnectionGraphNode fieldNode = new ConnectionGraphNode(field.getName(), ConnectionGraph.NodeType.FIELD, lineNo);
-                    out.addEdge(rightNode, fieldNode, ConnectionGraph.EdgeType.FIELD);
-                }
-                logger.info("rightOp is an instance of BinopExpr, Created phantom object node");
-            } else if (rightOp instanceof CastExpr) {
-                // phantom node starts with # type cast expression
-                ConnectionGraphNode rightNode = new ConnectionGraphNode("#" + type.toString(), ConnectionGraph.NodeType.OBJECT, lineNo);
-                for (ConnectionGraphNode leftRefNode : leftRefNodes) {
-                    out.addEdge(leftRefNode, rightNode, ConnectionGraph.EdgeType.POINTSTO);
-                }
-                SootClass objClass = Scene.v().getSootClass(type.toString());
-                Collection<SootField> fields = objClass.getFields().getElementsUnsorted();
-
-                for (SootField field : fields) {
-                    ConnectionGraphNode fieldNode = new ConnectionGraphNode(field.getName(), ConnectionGraph.NodeType.FIELD, lineNo);
-                    out.addEdge(rightNode, fieldNode, ConnectionGraph.EdgeType.FIELD);
-                }
-                logger.info("rightOp is an instance of CastExpr, Created phantom object node");
-            } else if (rightOp instanceof InstanceOfExpr) {
-                return;
-
             } else if (rightOp instanceof InvokeExpr) {
-                // phantom node starts with #
-                ConnectionGraphNode rightNode = new ConnectionGraphNode("#" + type.toString(), ConnectionGraph.NodeType.OBJECT, lineNo);
-                for (ConnectionGraphNode leftRefNode : leftRefNodes) {
-                    out.addEdge(leftRefNode, rightNode, ConnectionGraph.EdgeType.POINTSTO);
-                }
-                SootClass objClass = Scene.v().getSootClass(type.toString());
-                Collection<SootField> fields = objClass.getFields().getElementsUnsorted();
-
-                for (SootField field : fields) {
-                    ConnectionGraphNode fieldNode = new ConnectionGraphNode(field.getName(), ConnectionGraph.NodeType.FIELD, lineNo);
-                    out.addEdge(rightNode, fieldNode, ConnectionGraph.EdgeType.FIELD);
-                }
+                //todo cannnot be escaped, as I can't replace InvokeStmt with scalars.
+                //todo create an end node instead
                 logger.info("rightOp is an instance of InvokeExpr, Created phantom object node");
 
-            } else if (rightOp instanceof NewExpr) {
+            } else if (rightOp instanceof NewExpr || rightOp instanceof CastExpr) {
                 logger.info("rightOp is an instance of NewExpr");
+
+                //todo problems bc of "end" class like- obj with no fields;
+                //todo similar problems due to phantom. Find the reason and nature of phantom. It is mainly used in interprocedural.
                 ConnectionGraphNode rightNode = new ConnectionGraphNode(type.toString(), ConnectionGraph.NodeType.OBJECT, lineNo);
+
                 for (ConnectionGraphNode leftRefNode : leftRefNodes) {
                     out.addEdge(leftRefNode, rightNode, ConnectionGraph.EdgeType.POINTSTO);
                 }
-                SootClass objClass = Scene.v().getSootClass(type.toString());
+
                 Collection<SootField> fields = objClass.getFields().getElementsUnsorted();
+
 
                 logger.info("rightOp is an instance of NewExpr, Creating new Object {} with fields {}", objClass, fields);
                 for (SootField field : fields) {
@@ -198,20 +167,7 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
             } else if (rightOp instanceof NewMultiArrayExpr) {
                 return;
             } else if (rightOp instanceof NegExpr) {
-                // phantom node starts with #
-                logger.info("rightOp is an instance of NegExpr, Created phantom object node");
-                ConnectionGraphNode rightNode = new ConnectionGraphNode("#" + type.toString(), ConnectionGraph.NodeType.OBJECT, lineNo);
-                for (ConnectionGraphNode leftRefNode : leftRefNodes) {
-                    out.addEdge(leftRefNode, rightNode, ConnectionGraph.EdgeType.POINTSTO);
-                }
-                SootClass objClass = Scene.v().getSootClass(type.toString());
-                Collection<SootField> fields = objClass.getFields().getElementsUnsorted();
-
-                for (SootField field : fields) {
-                    ConnectionGraphNode fieldNode = new ConnectionGraphNode(field.getName(), ConnectionGraph.NodeType.FIELD, lineNo);
-                    out.addEdge(rightNode, fieldNode, ConnectionGraph.EdgeType.FIELD);
-                }
-
+                return;
             } else if (rightOp instanceof FieldRef) {
                 // a = b.f
                 // a can point to different objects based on context
@@ -228,7 +184,7 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
             }
         }
 
-        logger.info("flowthrough end for unit at line {}, {} \n in_graph {} \n out_graph {}", unit.getJavaSourceStartLineNumber(), unit, in, out);
+        logger.info("flowthrough end for unit at line {} - {} \n out_graph {}", unit.getJavaSourceStartLineNumber(), unit, out);
 
 //        TODO covert to visitor pattern
 //        unit.apply(new AbstractStmtSwitch() {

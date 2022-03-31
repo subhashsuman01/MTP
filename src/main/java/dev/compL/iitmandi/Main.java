@@ -1,6 +1,7 @@
 package dev.compL.iitmandi;
 
 import dev.compL.iitmandi.intraAnalysis.IntraAnalysis;
+import dev.compL.iitmandi.methodToJimple.MethodToJimple;
 import dev.compL.iitmandi.scalar_replacement.ScalarReplacement;
 import dev.compL.iitmandi.scalar_replacement.ScalarTransform;
 import org.slf4j.Logger;
@@ -23,10 +24,10 @@ public class Main {
         String taskName = args[0];
         String[] restOfTheArgs = Arrays.copyOfRange(args, 1, args.length);
         switch (taskName) {
-            case "method-to-jimpleStmts":
+            case "jimple":
                 // to play with Jimple body of methods
                 logger.info("Executing method-to-jimpleStmts");
-                //TODO
+                MethodToJimple.main(args);
                 break;
             case "visualise-method-cfg":
                 // visualise the CFG of a method
@@ -44,7 +45,7 @@ public class Main {
                 logger.info("Executing Inter-Procedural Analysis");
                 //TODO
                 break;
-            case "scalar-replacement":
+            case "scalar":
                 // Perform scalar replacement over given class files
                 // Need to provide the objects that are not escaping as arguments
                 logger.info("Perform Scalar Replacement");

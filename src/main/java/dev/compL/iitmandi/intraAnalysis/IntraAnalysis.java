@@ -19,7 +19,6 @@ import java.io.File;
 public class IntraAnalysis {
     public static void main(String[] args) {
 
-
         final Logger logger = LoggerFactory.getLogger(IntraAnalysis.class);
 
         String sourceDir = System.getProperty("user.dir") + File.separator + "example" + File.separator + "IntraAnalysis";
@@ -38,18 +37,25 @@ public class IntraAnalysis {
 //        sc.setApplicationClass();
 
         SootClass mainClass = Scene.v().getSootClass(className);
-        SootMethod method = mainClass.getMethodByName("methodA");
+        SootMethod method = mainClass.getMethodByName("method");
 
 
         JimpleBody methodBody = (JimpleBody) method.retrieveActiveBody();
 
-        for (Unit unit : methodBody.getUnits()) {
-            System.out.println(Integer.toString(unit.getJavaSourceStartLineNumber()) + "  " + unit);
-        }
         UnitGraph unitGraph = new TrapUnitGraph(methodBody);
 
-        EscapeAnalysis analysis = new EscapeAnalysis(unitGraph, EscapeAnalysis.AnalysisMode.CONTEXT_INSENSITIVE);
+        for (Unit unit : methodBody.getUnits()) {
+            System.out.println(unit.getJavaSourceStartLineNumber() + "  " + unit);
+        }
 
+
+
+        EscapeAnalysis analysis = new EscapeAnalysis(unitGraph, EscapeAnalysis.AnalysisMode.CONTEXT_INSENSITIVE);
+        
+        logger.info("-------------------------------");
+        logger.info("-------------------------------");
+        logger.info("-------------------------------");
+        logger.info("-------------------------------");
 
     }
 }

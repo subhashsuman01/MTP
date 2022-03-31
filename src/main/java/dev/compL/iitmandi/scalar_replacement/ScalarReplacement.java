@@ -1,3 +1,11 @@
+// todo remove allocation
+// todo add allocation
+// todo replace local var with new name
+// todo scalar replacement:
+// todo handle initialiser
+// create helper functions actual analysis will be carried out in intraprocedural analysis.
+
+
 package dev.compL.iitmandi.scalar_replacement;
 
 import dev.compL.iitmandi.intraAnalysis.IntraAnalysis;
@@ -5,10 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import soot.*;
 import soot.jimple.JimpleBody;
-import soot.jimple.ReturnStmt;
 import soot.options.Options;
-import soot.toolkits.graph.TrapUnitGraph;
-import soot.toolkits.graph.UnitGraph;
 
 import java.io.File;
 import java.util.Collections;
@@ -19,8 +24,8 @@ public class ScalarReplacement {
 
         final Logger logger = LoggerFactory.getLogger(IntraAnalysis.class);
 
-        String sourceDir = System.getProperty("user.dir") + File.separator + "example" + File.separator + "IntraAnalysis";
-        String className = "IntraAnalysis";
+        String sourceDir = System.getProperty("user.dir") + File.separator + "example" + File.separator + "ScalarReplacement";
+        String className = "ScalarTransform";
         G.reset();
         Options.v().set_whole_program(true);
         Options.v().app();
@@ -36,19 +41,12 @@ public class ScalarReplacement {
 
         SootClass mainClass = Scene.v().getSootClass(className);
 
-        SootMethod initMethod = mainClass.getMethodByName("<init>");
-        SootMethod method = mainClass.getMethodByName("methodA");
+        SootMethod method = mainClass.getMethodByName("method");
 
         JimpleBody methodBody = (JimpleBody) method.retrieveActiveBody();
-        JimpleBody initMethodBody = (JimpleBody) initMethod.retrieveActiveBody();
 
 
-//        new ScalarTransform().internalTransform(methodBody, "jtb", Collections.emptyMap());
-
-//        for (Unit unit: methodBody.getUnits()) {
-//            System.out.println(unit);
-//        }
-
+        new ScalarTransform().internalTransform(methodBody, "jtb", Collections.emptyMap());
     }
 
 }
