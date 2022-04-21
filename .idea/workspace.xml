@@ -4,28 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e0e61226-97a7-48e3-bbcd-cec3aef7bf27" name="Changes" comment="intra-procedural">
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/dev/compL/iitmandi/intraAnalysis/EscapeAnalysis$AnalysisMode.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/dev/compL/iitmandi/intraAnalysis/EscapeAnalysis$AnalysisMode.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/dev/compL/iitmandi/intraAnalysis/EscapeAnalysis.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/dev/compL/iitmandi/intraAnalysis/EscapeAnalysis.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/dev/compL/iitmandi/intraAnalysis/IntraAnalysis.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/dev/compL/iitmandi/intraAnalysis/IntraAnalysis.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/dev/compL/iitmandi/scalar_replacement/ScalarTransform.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/dev/compL/iitmandi/scalar_replacement/ScalarTransform.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/dev/compL/iitmandi/utils/ConnectionGraph$EdgeType.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/dev/compL/iitmandi/utils/ConnectionGraph$EdgeType.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/dev/compL/iitmandi/utils/ConnectionGraph$NodeType.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/dev/compL/iitmandi/utils/ConnectionGraph$NodeType.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/dev/compL/iitmandi/utils/ConnectionGraph.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/dev/compL/iitmandi/utils/ConnectionGraph.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/distributions/partial-escape-analysis-1.0-SNAPSHOT.tar" beforeDir="false" afterPath="$PROJECT_DIR$/build/distributions/partial-escape-analysis-1.0-SNAPSHOT.tar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/distributions/partial-escape-analysis-1.0-SNAPSHOT.zip" beforeDir="false" afterPath="$PROJECT_DIR$/build/distributions/partial-escape-analysis-1.0-SNAPSHOT.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/libs/partial-escape-analysis-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/build/libs/partial-escape-analysis-1.0-SNAPSHOT.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" beforeDir="false" afterPath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/IntraAnalysis/DataObj.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/IntraAnalysis/DataObj.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/IntraAnalysis/IntraAnalysis$Obj.class" beforeDir="false" afterPath="$PROJECT_DIR$/example/IntraAnalysis/IntraAnalysis$Obj.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/IntraAnalysis/IntraAnalysis.class" beforeDir="false" afterPath="$PROJECT_DIR$/example/IntraAnalysis/IntraAnalysis.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/IntraAnalysis/IntraAnalysis.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/IntraAnalysis/IntraAnalysis.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/intraAnalysis/EscapeAnalysis.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/intraAnalysis/EscapeAnalysis.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/intraAnalysis/IntraAnalysis.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/intraAnalysis/IntraAnalysis.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/scalar_replacement/ScalarTransform.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/scalar_replacement/ScalarTransform.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/utils/ConnectionGraph.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/utils/ConnectionGraph.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/ConnectionGraphTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ConnectionGraphTest.java" afterDir="false" />
-    </list>
+    <list default="true" id="e0e61226-97a7-48e3-bbcd-cec3aef7bf27" name="Changes" comment="intra-procedural" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -262,7 +241,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="intra-procedural" />
-    <option name="LAST_COMMIT_MESSAGE" value="intra-procedural" />
+    <option name="LAST_COMMIT_MESSAGE" value="" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
