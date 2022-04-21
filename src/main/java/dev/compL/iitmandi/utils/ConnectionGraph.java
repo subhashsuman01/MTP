@@ -83,6 +83,39 @@ public final class ConnectionGraph implements Serializable {
         }
     }
 
+    public void extend(ConnectionGraph graph2){
+        for (ConnectionGraphNode key : graph2.getReversePointsToEdge().keySet()){
+            if (!reversePointsToEdge.containsKey(key)){
+                reversePointsToEdge.put(key, new HashSet<>());
+            }
+            reversePointsToEdge.get(key).addAll(graph2.getReversePointsToEdge().get(key));
+        }
+        for (ConnectionGraphNode key : graph2.getReverseDeferredEdge().keySet()){
+            if (!reverseDeferredEdge.containsKey(key)){
+                reverseDeferredEdge.put(key, new HashSet<>());
+            }
+            reverseDeferredEdge.get(key).addAll(graph2.getReverseDeferredEdge().get(key));
+        }
+        for (ConnectionGraphNode key : graph2.getForwardPointsToEdge().keySet()){
+            if (!forwardPointsToEdge.containsKey(key)){
+                forwardPointsToEdge.put(key, new HashSet<>());
+            }
+            forwardPointsToEdge.get(key).addAll(graph2.getForwardPointsToEdge().get(key));
+        }
+        for (ConnectionGraphNode key : graph2.getForwardDeferredEdge().keySet()){
+            if (!forwardDeferredEdge.containsKey(key)){
+                forwardDeferredEdge.put(key, new HashSet<>());
+            }
+            forwardDeferredEdge.get(key).addAll(graph2.getForwardDeferredEdge().get(key));
+        }
+        for (ConnectionGraphNode key : graph2.getFieldEdge().keySet()){
+            if (!fieldEdge.containsKey(key)){
+                fieldEdge.put(key, new HashSet<>());
+            }
+            fieldEdge.get(key).addAll(graph2.getFieldEdge().get(key));
+        }
+    }
+
     //todo get pointsTo or phantom. It should return all objects ref pointsTo or a phantom node of that class.
 
     public ConnectionGraph merge(ConnectionGraph graph2) {
@@ -159,6 +192,10 @@ public final class ConnectionGraph implements Serializable {
             objectList.forEach(object -> removeEdge(node, object, EdgeType.POINTSTO));
         }
 
+    }
+
+    public boolean isEmpty(){
+        return forwardDeferredEdge.isEmpty() && forwardPointsToEdge.isEmpty() && fieldEdge.isEmpty() && reverseDeferredEdge.isEmpty() && reversePointsToEdge.isEmpty();
     }
 
     public List<ConnectionGraphNode> findFields(ConnectionGraphNode refNode, String fieldName) {

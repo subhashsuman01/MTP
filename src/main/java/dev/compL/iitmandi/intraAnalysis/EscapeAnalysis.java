@@ -31,8 +31,7 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
 
     @Override
     protected void copy(ConnectionGraph source, ConnectionGraph dest) {
-//        logger.info("Performing Copy");
-        dest = SerializationUtils.clone(source);
+        dest.extend(source);
     }
 
     @Override
@@ -40,11 +39,11 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
 //        logger.info("performing entryInitFlow");
         return super.entryInitialFlow();
     }
-
-    @Override
-    protected boolean isForward() {
-        return true;
-    }
+//
+//    @Override
+//    protected boolean isForward() {
+//        return true;
+//    }
 
     private void mergeHelper(HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> graph1, HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> graph2, HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> graph3){
         graph1.forEach((elm, set) -> {
@@ -68,32 +67,32 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
         mergeHelper(in1.getReverseDeferredEdge(), in2.getReverseDeferredEdge(), out.getReverseDeferredEdge());
         mergeHelper(in1.getReversePointsToEdge(), in2.getReversePointsToEdge(), out.getReversePointsToEdge());
         mergeHelper(in1.getFieldEdge(), in2.getFieldEdge(), out.getFieldEdge());
-        logger.info("Performing merge for in: {} \n in2: {} \n out: {}", in1, in2, out);
+//        logger.info("Performing merge for in: {} \n in2: {} \n out: {}", in1, in2, out);
     }
 
     protected void flowThrough(ConnectionGraph in, Unit unit, ConnectionGraph out) {
 
-        logger.info("flowthrough start for unit at line {}, {} \n in_graph {}", unit.getJavaSourceStartLineNumber(), unit, in);
+//        logger.info("flowthrough start for unit at line {}, {} \n in_graph {}", unit.getJavaSourceStartLineNumber(), unit, in);
+
         out.union(in);
         int lineNo = unit.getJavaSourceStartLineNumber();
 
         if (unit instanceof AssignStmt) {
-
             AssignStmt stmt = (AssignStmt) unit;
             Type type = stmt.getLeftOp().getType();
             Value rightOp = stmt.getRightOp();
             Value leftOp = stmt.getLeftOp();
-            logger.info("unit is an instance of AssignStmt with type: {}, leftOp: {}, rightOp: {}", type, leftOp, rightOp);
+//            logger.info("unit is an instance of AssignStmt with type: {}, leftOp: {}, rightOp: {}", type, leftOp, rightOp);
 
             // don't need to include primitive types as they are allocated on the stack
             if (type instanceof PrimType) {
-                logger.warn("Primitive type assignment");
+//                logger.warn("Primitive type assignment");
                 return;
             }
             // we only care about data classes
             SootClass objClass = Scene.v().getSootClass(type.toString());
             if (objClass.getMethods().size()>1){
-                logger.warn("Not a data class");
+//                logger.warn("Not a data class");
                 return;
             }
 
@@ -106,21 +105,21 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
                 if (analysisMode == AnalysisMode.CONTEXT_SENSITIVE) {
                     out.byPass(leftRefNodes.get(0));
                 }
-                logger.info("leftOp is an instance of ArrayRef, leftOp {}", leftOp);
+//                logger.info("leftOp is an instance of ArrayRef, leftOp {}", leftOp);
             } else if (leftOp instanceof Local) {
                 // ref
                 leftRefNodes.add(new ConnectionGraphNode(leftOp.toString(), ConnectionGraph.NodeType.REF, -1));
                 if (analysisMode == AnalysisMode.CONTEXT_SENSITIVE) {
                     out.byPass(leftRefNodes.get(0));
                 }
-                logger.info("leftOp is an instance of local, leftOp {}", leftOp);
+//                logger.info("leftOp is an instance of local, leftOp {}", leftOp);
             } else if (leftOp instanceof FieldRef) {
                 // ref.field
                 FieldRef fieldRefExp = (FieldRef) ((AssignStmt) unit).getLeftOp();
                 ConnectionGraphNode fieldRefNode = new ConnectionGraphNode(fieldRefExp.getFieldRef().toString(), ConnectionGraph.NodeType.REF, -1);
                 String fieldName = fieldRefExp.getField().toString();
                 leftRefNodes.addAll(in.findFields(fieldRefNode, fieldName));
-                logger.info("leftOp is an instance of FieldRef. All possible fields reachable by the ref - {}", leftRefNodes);
+//                logger.info("leftOp is an instance of FieldRef. All possible fields reachable by the ref - {}", leftRefNodes);
                 // should not bypass field refs as it can point different objects depending on the context
             } else {
                 //field
@@ -129,21 +128,16 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
                 if (analysisMode == AnalysisMode.CONTEXT_SENSITIVE) {
                     out.byPass(leftRefNodes.get(0));
                 }
-                logger.info("leftOp is an instance of field, ref - {}", refNode);
+//                logger.info("leftOp is an instance of field, ref - {}", refNode);
             }
             if (rightOp instanceof Local) {
                 ConnectionGraphNode rightNode = new ConnectionGraphNode(rightOp.toString(), ConnectionGraph.NodeType.REF, -1);
                 for (ConnectionGraphNode leftRefNode : leftRefNodes) {
                     out.addEdge(leftRefNode, rightNode, ConnectionGraph.EdgeType.DEFERRED);
                 }
-                logger.info("rightOp is an instance of local, ref - {}", rightNode);
-            } else if (rightOp instanceof InvokeExpr) {
-                //todo cannnot be escaped, as I can't replace InvokeStmt with scalars.
-                //todo create an end node instead
-                logger.info("rightOp is an instance of InvokeExpr, Created phantom object node");
-
+//                logger.info("rightOp is an instance of local, ref - {}", rightNode);
             } else if (rightOp instanceof NewExpr || rightOp instanceof CastExpr) {
-                logger.info("rightOp is an instance of NewExpr");
+//                logger.info("rightOp is an instance of NewExpr");
 
                 //todo problems bc of "end" class like- obj with no fields;
                 //todo similar problems due to phantom. Find the reason and nature of phantom. It is mainly used in interprocedural.
@@ -175,7 +169,7 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
                 ConnectionGraphNode fieldRefNode = new ConnectionGraphNode(fieldRefExp.getFieldRef().toString(), ConnectionGraph.NodeType.REF, -1);
                 String fieldName = fieldRefExp.getField().toString();
                 List<ConnectionGraphNode> listFields = in.findFields(fieldRefNode, fieldName);
-                logger.info("rightOp is an instance of FieldRef, rightOp: {}, fieldName: {}, all references reachable: {}", rightOp, fieldName, listFields);
+//                logger.info("rightOp is an instance of FieldRef, rightOp: {}, fieldName: {}, all references reachable: {}", rightOp, fieldName, listFields);
                 for (ConnectionGraphNode leftRefNode : leftRefNodes) {
                     for (ConnectionGraphNode fieldNode : listFields) {
                         out.addEdge(leftRefNode, fieldNode, ConnectionGraph.EdgeType.DEFERRED);
@@ -184,7 +178,8 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
             }
         }
 
-        logger.info("flowthrough end for unit at line {} - {} \n out_graph {}", unit.getJavaSourceStartLineNumber(), unit, out);
+
+//        logger.info("flowthrough end for unit at line {} - {} \n out_graph {}", unit.getJavaSourceStartLineNumber(), unit, out);
 
 //        TODO covert to visitor pattern
 //        unit.apply(new AbstractStmtSwitch() {

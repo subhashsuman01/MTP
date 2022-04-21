@@ -82,7 +82,10 @@ public class ConnectionGraphTest {
         ConnectionGraph graph1 = new ConnectionGraph();
         graph1.addEdge(new ConnectionGraphNode("ref", ConnectionGraph.NodeType.REF,-1), new ConnectionGraphNode("obj1", ConnectionGraph.NodeType.OBJECT,1), ConnectionGraph.EdgeType.POINTSTO);
 
-        ConnectionGraph graph2 = SerializationUtils.clone(graph1);
+
+//        ConnectionGraph graph2 = SerializationUtils.clone(graph1);
+        ConnectionGraph graph2 = new ConnectionGraph();
+        graph2.extend(graph1);
         assertEquals(graph1, graph2);
 
         graph1.addEdge(new ConnectionGraphNode("ref2", ConnectionGraph.NodeType.REF,-1), new ConnectionGraphNode("obj1", ConnectionGraph.NodeType.OBJECT,1), ConnectionGraph.EdgeType.POINTSTO);

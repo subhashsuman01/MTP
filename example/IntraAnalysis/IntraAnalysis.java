@@ -9,7 +9,7 @@ public class IntraAnalysis {
     public void methodA(Obj obj){
     }
 
-    public void methodB(int a){
+    public void methodB(Obj obj){
     }
 
     public void methodC(){
@@ -20,12 +20,9 @@ public class IntraAnalysis {
         String name = scan.nextLine();
         Obj obj = new Obj();
         if(name.equals("tom")){
-            fld = obj;
             methodA(obj);
         } else {
-            int a = obj.f1;
-            methodB(a);
+            methodB(obj);
         }
-        methodC();
     }
 }
