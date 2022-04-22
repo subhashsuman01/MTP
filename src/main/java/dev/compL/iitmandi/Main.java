@@ -3,7 +3,6 @@ package dev.compL.iitmandi;
 import dev.compL.iitmandi.intraAnalysis.IntraAnalysis;
 import dev.compL.iitmandi.methodToJimple.MethodToJimple;
 import dev.compL.iitmandi.scalar_replacement.ScalarReplacement;
-import dev.compL.iitmandi.scalar_replacement.ScalarTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
