@@ -22,7 +22,8 @@ public class IntraAnalysis {
         if(name.equals("tom")){
             methodA(obj);
         } else {
-            methodB(obj);
+            obj.f1 = 2;
         }
+        methodB(obj);
     }
 }

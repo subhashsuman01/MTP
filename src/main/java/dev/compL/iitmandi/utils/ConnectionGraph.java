@@ -49,10 +49,10 @@ public final class ConnectionGraph implements Serializable {
     void addEdgeHelper(ConnectionGraphNode n1, ConnectionGraphNode n2, HashMap<ConnectionGraphNode, HashSet<ConnectionGraphNode>> map) {
 //        logger.info("adding edge between n1: {}, n2:{}, map:{}", n1, n2, map);
         if (map.containsKey(n1)) {
-            logger.info("map contains n1");
+//            logger.info("map contains n1");
             map.get(n1).add(n2);
         } else {
-            logger.info("map does not have n1");
+//            logger.info("map does not have n1");
             map.put(n1, Sets.newHashSet(n2));
         }
     }

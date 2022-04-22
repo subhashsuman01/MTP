@@ -4,7 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e0e61226-97a7-48e3-bbcd-cec3aef7bf27" name="Changes" comment="intra-procedural" />
+    <list default="true" id="e0e61226-97a7-48e3-bbcd-cec3aef7bf27" name="Changes" comment="random">
+      <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/IntraAnalysis/IntraAnalysis.class" beforeDir="false" afterPath="$PROJECT_DIR$/example/IntraAnalysis/IntraAnalysis.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/IntraAnalysis/IntraAnalysis.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/IntraAnalysis/IntraAnalysis.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/ScalarReplacement/ScalarTransform.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/ScalarReplacement/ScalarTransform.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/intraAnalysis/EscapeAnalysis.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/intraAnalysis/EscapeAnalysis.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/intraAnalysis/IntraAnalysis.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/intraAnalysis/IntraAnalysis.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/scalar_replacement/ScalarTransform.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/scalar_replacement/ScalarTransform.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/utils/ConnectionGraph.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/compL/iitmandi/utils/ConnectionGraph.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -225,7 +235,14 @@
       <option name="project" value="LOCAL" />
       <updated>1648718655126</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="random">
+      <created>1650532171008</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1650532171008</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -241,7 +258,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="intra-procedural" />
-    <option name="LAST_COMMIT_MESSAGE" value="" />
+    <MESSAGE value="random" />
+    <option name="LAST_COMMIT_MESSAGE" value="random" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -1,10 +1,3 @@
-// todo bool -> if_escaping()
-
-// todo reInitFields()
-// todo replace useboxes()
-// todo initialise fields based on initialiser
-// todo check object is not an interface-implementation or extended
-
 package dev.compL.iitmandi.scalar_replacement;
 
 import dev.compL.iitmandi.intraAnalysis.IntraAnalysis;

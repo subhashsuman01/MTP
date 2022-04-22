@@ -10,15 +10,15 @@ public class ScalarTransform {
     }
 
     public void methodA(){
-        // todo
+        // pass
     }
 
     public void methodB(){
-        // todo
+        // pass
     }
 
     public void methodC(){
-        // todo
+        // pass
     }
 
     public void method() {

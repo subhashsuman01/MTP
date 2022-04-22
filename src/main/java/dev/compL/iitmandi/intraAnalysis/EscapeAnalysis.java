@@ -2,7 +2,6 @@ package dev.compL.iitmandi.intraAnalysis;
 
 import dev.compL.iitmandi.utils.ConnectionGraph;
 import dev.compL.iitmandi.utils.ConnectionGraphNode;
-import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import soot.*;
@@ -18,7 +17,7 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
 
     public EscapeAnalysis(DirectedGraph<Unit> graph, AnalysisMode analysisMode) {
         super(graph);
-        logger.info("Starting forward flow analysis with mode {}", analysisMode);
+//        logger.info("Starting forward flow analysis with mode {}", analysisMode);
         this.analysisMode = analysisMode;
         doAnalysis();
     }
@@ -150,7 +149,7 @@ public class EscapeAnalysis extends ForwardFlowAnalysis<Unit, ConnectionGraph> {
                 Collection<SootField> fields = objClass.getFields().getElementsUnsorted();
 
 
-                logger.info("rightOp is an instance of NewExpr, Creating new Object {} with fields {}", objClass, fields);
+//                logger.info("rightOp is an instance of NewExpr, Creating new Object {} with fields {}", objClass, fields);
                 for (SootField field : fields) {
                     ConnectionGraphNode fieldNode = new ConnectionGraphNode(field.getName(), ConnectionGraph.NodeType.FIELD, lineNo);
                     out.addEdge(rightNode, fieldNode, ConnectionGraph.EdgeType.FIELD);
