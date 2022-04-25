@@ -5,6 +5,7 @@
 
 package dev.compL.iitmandi.intraAnalysis;
 
+import dev.compL.iitmandi.utils.BranchInfo;
 import dev.compL.iitmandi.utils.ConnectionGraph;
 import dev.compL.iitmandi.utils.ConnectionGraphNode;
 import org.slf4j.Logger;
@@ -57,35 +58,38 @@ public class IntraAnalysis {
 //        }
 
 
-        HashMap<Unit, String> branchInfo = new HashMap<>();
-        // todo improve branchStartInfo
-        HashMap<Unit, Stack<Integer>> branchStartInfo = new HashMap<>();
+        Stack<BranchInfo> branchStack = new Stack<>();
+        BranchInfo baseBranch = new BranchInfo("base", 0, 0, -1, unitGraph.getHeads().get(0), null);
+        branchStack.add(baseBranch);
 
         HashSet<Unit> startElse = new HashSet<>(), endElse = new HashSet<>();
-        Stack<Integer> tempStack = new Stack<>();
-        StringBuilder temp = new StringBuilder("0");
+
         for (Unit unit: methodBody.getUnits()){
             if (unit instanceof IfStmt){
                 IfStmt stmt = (IfStmt) unit;
                 startElse.add(stmt.getTarget());
-                temp.append('1');
-                tempStack.add(unit.getJavaSourceStartLineNumber());
+                BranchInfo head = branchStack.peek();
+                BranchInfo newBranch = new BranchInfo("if", branchStack.size(), unit.getJavaSourceStartLineNumber(), -1, unit, null);
+                head.addChild(newBranch);
+                branchStack.add(newBranch);
             }
             else if (unit instanceof GotoStmt){
+                BranchInfo head = branchStack.pop();
+                head.setEndUnit(unit);
+                head.setEndLine(unit.getJavaSourceStartLineNumber());
                 GotoStmt stmt = (GotoStmt) unit;
                 endElse.add(stmt.getTarget());
-                temp.deleteCharAt(temp.length() - 1);
-                tempStack.pop();
             }
             else if (startElse.contains(unit)){
-                temp.append('2');
-                tempStack.add(unit.getJavaSourceStartLineNumber());
+                BranchInfo head = branchStack.peek();
+                BranchInfo newBranch = new BranchInfo("else", branchStack.size(), unit.getJavaSourceStartLineNumber(), -1, unit, null);
+                head.addChild(newBranch);
+                branchStack.add(newBranch);
             } else if (endElse.contains(unit)){
-                temp.deleteCharAt(temp.length() - 1);
-                tempStack.pop();
+                BranchInfo head = branchStack.pop();
+                head.setEndLine(unit.getJavaSourceStartLineNumber());
+                head.setEndUnit(unit);
             }
-            branchInfo.put(unit, temp.toString());
-            branchStartInfo.put(unit, (Stack<Integer>) tempStack.clone());
 
 //            logger.info("{} ---> {} ;;; {}", unit, branchInfo.get(unit), branchStartInfo.get(unit));
         }
@@ -136,7 +140,7 @@ public class IntraAnalysis {
                 HashSet<ConnectionGraphNode> st = graph.pointsTo(new ConnectionGraphNode(ref.toString(), ConnectionGraph.NodeType.REF, -1));
                 logger.info("unit:{}, ref: {} --> {}",unit ,ref, st);
                 for (ConnectionGraphNode objNode : st){
-                    escapingObjectInfo.get(objNode).add(branchInfo.get(unit));
+
                 }
             }
 
