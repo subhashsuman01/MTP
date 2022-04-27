@@ -64,37 +64,37 @@ public class IntraAnalysis {
 
         HashSet<Unit> startElse = new HashSet<>(), endElse = new HashSet<>();
 
+        HashMap<Unit, BranchInfo> unitBranchInfoHashMap = new HashMap<>();
+
         for (Unit unit: methodBody.getUnits()){
+            BranchInfo head = branchStack.peek();
+            unitBranchInfoHashMap.put(unit, head);
             if (unit instanceof IfStmt){
                 IfStmt stmt = (IfStmt) unit;
                 startElse.add(stmt.getTarget());
-                BranchInfo head = branchStack.peek();
                 BranchInfo newBranch = new BranchInfo("if", branchStack.size(), unit.getJavaSourceStartLineNumber(), -1, unit, null);
                 head.addChild(newBranch);
                 branchStack.add(newBranch);
             }
             else if (unit instanceof GotoStmt){
-                BranchInfo head = branchStack.pop();
+                branchStack.pop();
                 head.setEndUnit(unit);
                 head.setEndLine(unit.getJavaSourceStartLineNumber());
                 GotoStmt stmt = (GotoStmt) unit;
                 endElse.add(stmt.getTarget());
             }
             else if (startElse.contains(unit)){
-                BranchInfo head = branchStack.peek();
                 BranchInfo newBranch = new BranchInfo("else", branchStack.size(), unit.getJavaSourceStartLineNumber(), -1, unit, null);
                 head.addChild(newBranch);
                 branchStack.add(newBranch);
             } else if (endElse.contains(unit)){
-                BranchInfo head = branchStack.pop();
+                branchStack.pop();
                 head.setEndLine(unit.getJavaSourceStartLineNumber());
                 head.setEndUnit(unit);
             }
 
 //            logger.info("{} ---> {} ;;; {}", unit, branchInfo.get(unit), branchStartInfo.get(unit));
         }
-
-        HashMap<ConnectionGraphNode, HashSet<String>> escapingObjectInfo = new HashMap<>();
 
         for (Unit unit : methodBody.getUnits()){
             List<Value> escapingArgs = new ArrayList<>();
@@ -122,7 +122,6 @@ public class IntraAnalysis {
                     escapingArgs.addAll(invokeExpr.getArgs());
                 } else if (rightOp instanceof NewExpr){
                     ConnectionGraphNode node = new ConnectionGraphNode(type.toString(), ConnectionGraph.NodeType.OBJECT, unit.getJavaSourceStartLineNumber());
-                    escapingObjectInfo.put(node, new HashSet<>());
                 }
             }
             if (unit instanceof RetStmt){
@@ -138,7 +137,7 @@ public class IntraAnalysis {
             if (escapingArgs.isEmpty()) continue;
             for (Value ref: escapingArgs){
                 HashSet<ConnectionGraphNode> st = graph.pointsTo(new ConnectionGraphNode(ref.toString(), ConnectionGraph.NodeType.REF, -1));
-                logger.info("unit:{}, ref: {} --> {}",unit ,ref, st);
+                logger.info("unit:{}, ref: {} --> {}", unit, ref, st);
                 for (ConnectionGraphNode objNode : st){
 
                 }
