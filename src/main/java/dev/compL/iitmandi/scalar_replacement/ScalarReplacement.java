@@ -45,8 +45,28 @@ public class ScalarReplacement {
 
         JimpleBody methodBody = (JimpleBody) method.retrieveActiveBody();
 
+//        for (Unit unit: methodBody.getUnits()){
+//            logger.info(unit.toString());
+//        }
+//
+//
+//        System.out.println("--------------------------------------");
+//        System.out.println("--------------------------------------");
+//        System.out.println("--------------------------------------");
+//        System.out.println("--------------------------------------");
 
         new ScalarTransform().internalTransform(methodBody, "jtb", Collections.emptyMap());
+
+
+//        System.out.println("--------------------------------------");
+//        System.out.println("--------------------------------------");
+//        System.out.println("--------------------------------------");
+//        System.out.println("--------------------------------------");
+//
+//        for (Unit unit: methodBody.getUnits()){
+//            logger.info(unit.toString());
+//        }
+
     }
 
 }

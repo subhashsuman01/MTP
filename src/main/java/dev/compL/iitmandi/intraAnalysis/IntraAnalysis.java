@@ -5,6 +5,7 @@
 
 package dev.compL.iitmandi.intraAnalysis;
 
+import dev.compL.iitmandi.scalar_replacement.ScalarTransform;
 import dev.compL.iitmandi.utils.BranchInfo;
 import dev.compL.iitmandi.utils.ConnectionGraph;
 import dev.compL.iitmandi.utils.ConnectionGraphNode;
@@ -21,6 +22,9 @@ import java.util.*;
 
 
 public class IntraAnalysis {
+
+
+
     public static void main(String[] args) {
 
         final Logger logger = LoggerFactory.getLogger(IntraAnalysis.class);
@@ -96,6 +100,8 @@ public class IntraAnalysis {
 //            logger.info("{} ---> {} ;;; {}", unit, branchInfo.get(unit), branchStartInfo.get(unit));
         }
 
+        HashMap<ConnectionGraphNode, Unit> objectAllocMap = new HashMap<>();
+
         for (Unit unit : methodBody.getUnits()){
             List<Value> escapingArgs = new ArrayList<>();
 
@@ -122,6 +128,7 @@ public class IntraAnalysis {
                     escapingArgs.addAll(invokeExpr.getArgs());
                 } else if (rightOp instanceof NewExpr){
                     ConnectionGraphNode node = new ConnectionGraphNode(type.toString(), ConnectionGraph.NodeType.OBJECT, unit.getJavaSourceStartLineNumber());
+                    objectAllocMap.put(node, unit);
                 }
             }
             if (unit instanceof RetStmt){
@@ -137,17 +144,80 @@ public class IntraAnalysis {
             if (escapingArgs.isEmpty()) continue;
             for (Value ref: escapingArgs){
                 HashSet<ConnectionGraphNode> st = graph.pointsTo(new ConnectionGraphNode(ref.toString(), ConnectionGraph.NodeType.REF, -1));
-                logger.info("unit:{}, ref: {} --> {}", unit, ref, st);
+//                logger.info("unit:{}, ref: {} --> {}", unit, ref, st);
                 for (ConnectionGraphNode objNode : st){
-
+                    unitBranchInfoHashMap.get(unit).markEscapingObject(objNode);
                 }
             }
 
+
         }
+
+
+
+        BranchInfo.dfsMarkEscaping(baseBranch);
+
+        List<Unit> escapingFieldRefs = new ArrayList<>();
+
+        logger.info("iiiiiiiiiiii");
+        for (Unit unit : methodBody.getUnits()){
+
+            if (unit instanceof AssignStmt){
+                AssignStmt stmt = (AssignStmt) unit;
+                Type type = stmt.getLeftOp().getType();
+                Value leftOp = stmt.getLeftOp();
+                Value rightOp = stmt.getRightOp();
+                if (leftOp instanceof FieldRef){
+                    FieldRef fref = (FieldRef) leftOp;
+                   ConnectionGraph graph = analysis.getFlowAfter(unit);
+                    List<ValueBox> val = fref.getUseBoxes();
+                    if(val.size()!=1){
+                        continue;
+                    }
+                    Value ref = val.get(0).getValue();
+                    Set<ConnectionGraphNode> pointsTo = graph.pointsTo(new ConnectionGraphNode(ref.toString(), ConnectionGraph.NodeType.REF, -1));
+                    Set<ConnectionGraphNode> escapingInBranch = unitBranchInfoHashMap.get(unit).getEscapingObjects();
+                    if(pointsTo.stream().noneMatch(escapingInBranch::contains)){
+                        escapingFieldRefs.add(unit);
+                        logger.info(unit+"--------->"+leftOp+"------>"+ref);
+                    }
+                }
+                if (rightOp instanceof FieldRef){
+                    FieldRef fref = (FieldRef) rightOp;
+                    ConnectionGraph graph = analysis.getFlowAfter(unit);
+                    List<ValueBox> val = fref.getUseBoxes();
+                    if(val.size()!=1){
+                        continue;
+                    }
+                    Value ref = val.get(0).getValue();
+                    Set<ConnectionGraphNode> pointsTo = graph.pointsTo(new ConnectionGraphNode(ref.toString(), ConnectionGraph.NodeType.REF, -1));
+                    Set<ConnectionGraphNode> escapingInBranch = unitBranchInfoHashMap.get(unit).getEscapingObjects();
+                    if(pointsTo.stream().noneMatch(escapingInBranch::contains)){
+                        escapingFieldRefs.add(unit);
+                        logger.info(unit+"--------->"+rightOp+"------>"+ref);
+                    }
+                }
+            }
+        }
+        logger.info("iiiiiiiiiiii");
+
+
+        for (Unit unit: methodBody.getUnits()){
+            logger.info(unit.toString());
+        }
+
+        logger.info("-----------------");
+
+        ScalarTransform scalarTransform = new ScalarTransform(methodBody, baseBranch, objectAllocMap, unitBranchInfoHashMap, escapingFieldRefs);
+        scalarTransform.internalTransform();
+
+        logger.info("-----------------");
+
+        for (Unit unit: methodBody.getUnits()){
+            logger.info(unit.toString());
+        }
+
     }
 
 }
 
-// todo make a better data structure to store startbranchinfo and branchinfo
-// todo work on replacement using escapingObjectInfo
-// todo do a dfs over entire cfg for every object and do replacement; work on replacement algo

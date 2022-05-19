@@ -1,9 +1,11 @@
 package dev.compL.iitmandi.utils;
 
 
+import org.jetbrains.annotations.NotNull;
 import soot.Unit;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class BranchInfo {
@@ -15,6 +17,7 @@ public class BranchInfo {
     Unit startUnit;
     Unit endUnit;
     BranchInfo parent;
+    HashSet<ConnectionGraphNode> escapingObjects;
 
     public BranchInfo(String type, int depth, int startLine, int endLine, Unit startUnit, Unit endUnit){
         this.parent = null;
@@ -25,6 +28,7 @@ public class BranchInfo {
         this.endLine = endLine;
         this.startUnit = startUnit;
         this.endUnit = endUnit;
+        this.escapingObjects = new HashSet<>();
     }
 
     public BranchInfo getParent() {
@@ -110,10 +114,29 @@ public class BranchInfo {
                 '}';
     }
 
-    public static void dfs(BranchInfo root){
+    public HashSet<ConnectionGraphNode> getEscapingObjects() {
+        return escapingObjects;
+    }
+
+    public void markEscapingObject(ConnectionGraphNode object) {
+        this.escapingObjects.add(object);
+    }
+
+    public static void dfsPrint(BranchInfo root){
         System.out.println(root);
-        for (BranchInfo child: root.children) {
-            dfs(child);
+        for (BranchInfo child: root.getChildren()) {
+            dfsPrint(child);
         }
     }
+
+    public static void dfsMarkEscaping(@NotNull BranchInfo root){
+        BranchInfo parent = root.getParent();
+        if(parent != null){
+            root.getEscapingObjects().addAll(parent.getEscapingObjects());
+        }
+        for (BranchInfo child: root.getChildren()) {
+            dfsMarkEscaping(child);
+        }
+    }
+
 }
