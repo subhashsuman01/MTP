@@ -5,6 +5,9 @@ public class IntraAnalysis {
     class Obj {
         int f1 = 1;
         int f2 = 2;
+        public Obj(){
+            this.f1 = 2;
+        }
     }
     public void methodA(Obj obj){
     }
@@ -24,6 +27,5 @@ public class IntraAnalysis {
         } else {
             obj.f1 = 2;
         }
-        methodB(obj);
     }
 }

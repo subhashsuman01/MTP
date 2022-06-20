@@ -59,12 +59,13 @@ public class ScalarTransform extends BodyTransformer {
     }
 
     private void moveAllocStmts(BranchInfo root){
-
+//        logger.error(root.toString());
         if (!root.getType().equals("base")){
             BranchInfo parent = root.getParent();
             root.getEscapingObjects().forEach(obj -> {
                 if(!parent.getEscapingObjects().contains(obj)){
                     removeUnit.add(objectAllocMap.get(obj));
+                    removeUnit.add(units.getSuccOf(objectAllocMap.get(obj)));
                     insertAfterUnit.add(new ImmutablePair<>(objectAllocMap.get(obj) ,root.getStartUnit()));
 //                    units.remove(objectAllocMap.get(obj));
 //                    units.insertAfter(objectAllocMap.get(obj) ,root.getStartUnit());
@@ -104,23 +105,84 @@ public class ScalarTransform extends BodyTransformer {
         }
     }
 
+    public void assignmentTransform(){
+        for (Unit unit: units.getElementsUnsorted()){
+            if (unit instanceof AssignStmt){
+                AssignStmt stmt = (AssignStmt) unit;
+                Type type = stmt.getLeftOp().getType();
+                Value left = stmt.getLeftOp();
+                Value right = stmt.getRightOp();
+                if (type instanceof PrimType) continue;
+
+                if((left instanceof Local) && (right instanceof Local)){
+                    SootClass sc = Scene.v().getSootClass(type.toString());
+                    removeUnit.add(unit);
+                    for(SootField sf: sc.getFields()){
+                        Local local1 = Jimple.v().newLocal(left.toString()+"#"+sf.getName(),sf.getType());
+                        Local local2 = Jimple.v().newLocal(right.toString()+"#"+sf.getName(),sf.getType());
+                        locals.add(local1);
+                        locals.add(local2);
+                        AssignStmt newStmt = Jimple.v().newAssignStmt(local1, local2);
+                        insertAfterUnit.add(new ImmutablePair<>(newStmt ,unit));
+                    }
+                }
+            }
+        }
+    }
+
+    public void ifStmtTransform(){
+        for (Unit unit : units.getElementsUnsorted()){
+            if (unit instanceof IfStmt){
+                IfStmt ifStmt = (IfStmt) unit;
+                NopStmt newStmt = Jimple.v().newNopStmt();
+                Stmt target = ifStmt.getTarget();
+                units.insertBefore(newStmt,target);
+                ifStmt.setTarget(newStmt);
+            }
+        }
+    }
+
     public void internalTransform(){
+        ifStmtTransform();
         moveAllocStmts(baseBranch);
-        logger.info(insertAfterUnit.toString());
-        logger.info(removeUnit.toString());
+//        logger.info(insertAfterUnit.toString());
+//        logger.info(removeUnit.toString());
+        Value tmp;
         for (Unit unit: removeUnit){
+            List<Unit> body = new ArrayList<>();
+            if (unit instanceof InvokeStmt){
+                InvokeStmt invokeStmt = (InvokeStmt) unit;
+                for (Value val : invokeStmt.getInvokeExpr().getArgs()){
+                    Local l = Jimple.v().newLocal(invokeStmt.getInvokeExpr().getMethodRef().getName() + "#" + val, val.getType());
+                    locals.add(l);
+//                    units.insertAfter(Jimple.v().newAssignStmt(l, val),unit);
+                }
+            }
             units.remove(unit);
         }
         for (Pair<Unit,Unit> pair: insertAfterUnit){
-            AssignStmt stmt = (AssignStmt) pair.getLeft();
-            AssignStmt newStmt = Jimple.v().newAssignStmt(stmt.getLeftOp(), stmt.getRightOp());
-            units.insertAfter(newStmt, pair.getRight());
+            try {
+                AssignStmt stmt = (AssignStmt) pair.getLeft();
+                AssignStmt newStmt = Jimple.v().newAssignStmt(stmt.getLeftOp(), stmt.getRightOp());
+
+                InvokeStmt invStmt = Jimple.v().newInvokeStmt(Jimple.v().newVirtualInvokeExpr((Local) stmt.getLeftOp(),
+                        Scene.v().getSootClass(stmt.getLeftOp().getType().toString()).getMethodByName("<init>").makeRef()));
+
+                List<Unit> toInsert = new ArrayList<>();
+                toInsert.add(stmt);
+                toInsert.add(invStmt);
+                units.insertAfter(toInsert, pair.getRight());
+
+            } catch (Exception e){
+
+            }
         }
         removeUnit.clear();
         insertAfterUnit.clear();
         scalarReplacement();
-        logger.info(insertAfterUnit.toString());
-        logger.info(removeUnit.toString());
+        assignmentTransform();
+//        logger.info(insertAfterUnit.toString());
+//        logger.info(removeUnit.toString());
         for (Pair<Unit,Unit> pair: insertAfterUnit){
             units.insertAfter(pair.getLeft(), pair.getRight());
         }

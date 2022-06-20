@@ -159,7 +159,6 @@ public class IntraAnalysis {
 
         List<Unit> escapingFieldRefs = new ArrayList<>();
 
-        logger.info("iiiiiiiiiiii");
         for (Unit unit : methodBody.getUnits()){
 
             if (unit instanceof AssignStmt){
@@ -179,7 +178,7 @@ public class IntraAnalysis {
                     Set<ConnectionGraphNode> escapingInBranch = unitBranchInfoHashMap.get(unit).getEscapingObjects();
                     if(pointsTo.stream().noneMatch(escapingInBranch::contains)){
                         escapingFieldRefs.add(unit);
-                        logger.info(unit+"--------->"+leftOp+"------>"+ref);
+//                        logger.info(unit+"--------->"+leftOp+"------>"+ref);
                     }
                 }
                 if (rightOp instanceof FieldRef){
@@ -194,12 +193,11 @@ public class IntraAnalysis {
                     Set<ConnectionGraphNode> escapingInBranch = unitBranchInfoHashMap.get(unit).getEscapingObjects();
                     if(pointsTo.stream().noneMatch(escapingInBranch::contains)){
                         escapingFieldRefs.add(unit);
-                        logger.info(unit+"--------->"+rightOp+"------>"+ref);
+//                        logger.info(unit+"--------->"+rightOp+"------>"+ref);
                     }
                 }
             }
         }
-        logger.info("iiiiiiiiiiii");
 
 
         for (Unit unit: methodBody.getUnits()){
@@ -211,6 +209,9 @@ public class IntraAnalysis {
         ScalarTransform scalarTransform = new ScalarTransform(methodBody, baseBranch, objectAllocMap, unitBranchInfoHashMap, escapingFieldRefs);
         scalarTransform.internalTransform();
 
+        logger.info("-----------------");
+        logger.info("-----------------");
+        logger.info("-----------------");
         logger.info("-----------------");
 
         for (Unit unit: methodBody.getUnits()){
